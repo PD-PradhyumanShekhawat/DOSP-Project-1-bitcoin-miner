@@ -1,11 +1,17 @@
 -module(bitcoin_miner).
 
 -export([
-    mine_range/3
+    mine_range/3,       % for convinient testing
+    mine_range/4        % This is the actual function used by the boss
 ]).
 
-mine_range(K, Start, End) ->
-    mine_range(K, Start, End, "55742970", []).
+
+
+mine_range(K, Start, End) ->                                %%  Search all candidate numbers from Start to End, and 
+    mine_range(K, Start, End, "55742970").         %%  return the ones whose hashes have at least K leading zeroes
+
+mine_range(K, Start, End, GatorLinkId) ->
+    mine_range(K, Start, End, GatorLinkId, []).
 
 mine_range(_K, Current, End, _GatorLinkId, Results)
         when Current > End ->
