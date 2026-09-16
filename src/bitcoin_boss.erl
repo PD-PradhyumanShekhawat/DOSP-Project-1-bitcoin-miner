@@ -7,7 +7,6 @@
     start/5
 ]).
 
-%% Default: use all available schedulers and a finite search space.
 start(K, WorkUnit) ->
     start(
         K,
@@ -17,7 +16,6 @@ start(K, WorkUnit) ->
         "55742970"
     ).
 
-%% Specify GatorLink ID.
 start(K, WorkUnit, GatorLinkId) ->
     start(
         K,
@@ -27,7 +25,6 @@ start(K, WorkUnit, GatorLinkId) ->
         GatorLinkId
     ).
 
-%% Specify total search space and GatorLink ID.
 start(K, WorkUnit, TotalWork, GatorLinkId) ->
     start(
         K,
@@ -37,7 +34,6 @@ start(K, WorkUnit, TotalWork, GatorLinkId) ->
         GatorLinkId
     ).
 
-%% Full configuration.
 start(K, WorkUnit, TotalWork, WorkerCount, GatorLinkId) ->
     spawn(fun() ->
         boss_init(
@@ -56,6 +52,8 @@ boss_init(
     WorkerCount,
     GatorLinkId
 ) ->
+    register(bitcoin_boss, self()),
+
     io:format(
         "Starting ~p worker actors on ~p schedulers.~n",
         [
@@ -155,6 +153,57 @@ boss_loop(
     Workers
 ) ->
     receive
+
+        {register_worker, WorkerPid, WorkerGatorLinkId} ->
+            io:format(
+                "Remote worker registered: ~p~n",
+                [WorkerPid]
+            ),
+
+            case NextStart < TotalWork of
+                true ->
+                    End =
+                        min(
+                            NextStart + WorkUnit - 1,
+                            TotalWork - 1
+                        ),
+
+                    WorkerPid ! {
+                        work,
+                        K,
+                        NextStart,
+                        End
+                    },
+
+                    NewWorkers =
+                        maps:put(
+                            WorkerPid,
+                            {NextStart, End},
+                            Workers
+                        ),
+
+                    boss_loop(
+                        K,
+                        WorkUnit,
+                        TotalWork,
+                        WorkerGatorLinkId,
+                        End + 1,
+                        NewWorkers
+                    );
+
+                false ->
+                    WorkerPid ! stop,
+
+                    boss_loop(
+                        K,
+                        WorkUnit,
+                        TotalWork,
+                        GatorLinkId,
+                        NextStart,
+                        Workers
+                    )
+            end;
+
         {work_complete, WorkerPid, _Start, _End, Results} ->
             print_results(Results),
 
@@ -204,6 +253,7 @@ boss_loop(
                                 "Mining complete. Searched ~p candidates.~n",
                                 [TotalWork]
                             ),
+                            unregister(bitcoin_boss),
                             ok;
 
                         _ ->
@@ -228,6 +278,259 @@ print_results([{Candidate, Hash} | Rest]) ->
         [Candidate, Hash]
     ),
     print_results(Rest).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% -module(bitcoin_boss).
+
+% -export([
+%     start/2,
+%     start/3,
+%     start/4,
+%     start/5
+% ]).
+
+% %% Default: use all available schedulers and a finite search space.
+% start(K, WorkUnit) ->
+%     start(
+%         K,
+%         WorkUnit,
+%         1000000,
+%         erlang:system_info(schedulers_online),
+%         "55742970"
+%     ).
+
+% %% Specify GatorLink ID.
+% start(K, WorkUnit, GatorLinkId) ->
+%     start(
+%         K,
+%         WorkUnit,
+%         1000000,
+%         erlang:system_info(schedulers_online),
+%         GatorLinkId
+%     ).
+
+% %% Specify total search space and GatorLink ID.
+% start(K, WorkUnit, TotalWork, GatorLinkId) ->
+%     start(
+%         K,
+%         WorkUnit,
+%         TotalWork,
+%         erlang:system_info(schedulers_online),
+%         GatorLinkId
+%     ).
+
+% %% Full configuration.
+% start(K, WorkUnit, TotalWork, WorkerCount, GatorLinkId) ->
+%     spawn(fun() ->
+%         boss_init(
+%             K,
+%             WorkUnit,
+%             TotalWork,
+%             WorkerCount,
+%             GatorLinkId
+%         )
+%     end).
+
+% boss_init(
+%     K,
+%     WorkUnit,
+%     TotalWork,
+%     WorkerCount,
+%     GatorLinkId
+% ) ->
+%     io:format(
+%         "Starting ~p worker actors on ~p schedulers.~n",
+%         [
+%             WorkerCount,
+%             erlang:system_info(schedulers_online)
+%         ]
+%     ),
+
+%     {Workers, NextStart} =
+%         start_workers(
+%             WorkerCount,
+%             K,
+%             WorkUnit,
+%             TotalWork,
+%             GatorLinkId,
+%             0,
+%             #{}
+%         ),
+
+%     boss_loop(
+%         K,
+%         WorkUnit,
+%         TotalWork,
+%         GatorLinkId,
+%         NextStart,
+%         Workers
+%     ).
+
+% start_workers(
+%     0,
+%     _K,
+%     _WorkUnit,
+%     _TotalWork,
+%     _GatorLinkId,
+%     NextStart,
+%     Workers
+% ) ->
+%     {Workers, NextStart};
+
+% start_workers(
+%     Count,
+%     K,
+%     WorkUnit,
+%     TotalWork,
+%     GatorLinkId,
+%     NextStart,
+%     Workers
+% ) ->
+%     case NextStart < TotalWork of
+%         true ->
+%             WorkerPid =
+%                 bitcoin_worker:start(
+%                     self(),
+%                     GatorLinkId
+%                 ),
+
+%             End =
+%                 min(
+%                     NextStart + WorkUnit - 1,
+%                     TotalWork - 1
+%                 ),
+
+%             WorkerPid ! {
+%                 work,
+%                 K,
+%                 NextStart,
+%                 End
+%             },
+
+%             UpdatedWorkers =
+%                 maps:put(
+%                     WorkerPid,
+%                     {NextStart, End},
+%                     Workers
+%                 ),
+
+%             start_workers(
+%                 Count - 1,
+%                 K,
+%                 WorkUnit,
+%                 TotalWork,
+%                 GatorLinkId,
+%                 End + 1,
+%                 UpdatedWorkers
+%             );
+
+%         false ->
+%             {Workers, NextStart}
+%     end.
+
+% boss_loop(
+%     K,
+%     WorkUnit,
+%     TotalWork,
+%     GatorLinkId,
+%     NextStart,
+%     Workers
+% ) ->
+%     receive
+%         {work_complete, WorkerPid, _Start, _End, Results} ->
+%             print_results(Results),
+
+%             UpdatedWorkers =
+%                 maps:remove(
+%                     WorkerPid,
+%                     Workers
+%                 ),
+
+%             case NextStart < TotalWork of
+%                 true ->
+%                     NewEnd =
+%                         min(
+%                             NextStart + WorkUnit - 1,
+%                             TotalWork - 1
+%                         ),
+
+%                     WorkerPid ! {
+%                         work,
+%                         K,
+%                         NextStart,
+%                         NewEnd
+%                     },
+
+%                     NewWorkers =
+%                         maps:put(
+%                             WorkerPid,
+%                             {NextStart, NewEnd},
+%                             UpdatedWorkers
+%                         ),
+
+%                     boss_loop(
+%                         K,
+%                         WorkUnit,
+%                         TotalWork,
+%                         GatorLinkId,
+%                         NewEnd + 1,
+%                         NewWorkers
+%                     );
+
+%                 false ->
+%                     WorkerPid ! stop,
+
+%                     case maps:size(UpdatedWorkers) of
+%                         0 ->
+%                             io:format(
+%                                 "Mining complete. Searched ~p candidates.~n",
+%                                 [TotalWork]
+%                             ),
+%                             ok;
+
+%                         _ ->
+%                             boss_loop(
+%                                 K,
+%                                 WorkUnit,
+%                                 TotalWork,
+%                                 GatorLinkId,
+%                                 NextStart,
+%                                 UpdatedWorkers
+%                             )
+%                     end
+%             end
+%     end.
+
+% print_results([]) ->
+%     ok;
+
+% print_results([{Candidate, Hash} | Rest]) ->
+%     io:format(
+%         "~s\t~s~n",
+%         [Candidate, Hash]
+%     ),
+%     print_results(Rest).
 
 
 
