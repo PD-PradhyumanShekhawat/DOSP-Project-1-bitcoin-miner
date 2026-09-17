@@ -8,6 +8,7 @@
     start_silent/5
 ]).
 
+%% Default server configuration.
 start(K, WorkUnit) ->
     start(
         K,
@@ -47,6 +48,7 @@ start(K, WorkUnit, TotalWork, WorkerCount, GatorLinkId) ->
         )
     end).
 
+%% Used by benchmarks.
 start_silent(
     K,
     WorkUnit,
@@ -75,13 +77,18 @@ boss_init(
 ) ->
     register(bitcoin_boss, self()),
 
-    io:format(
-        "Starting ~p worker actors on ~p schedulers.~n",
-        [
-            WorkerCount,
-            erlang:system_info(schedulers_online)
-        ]
-    ),
+    case PrintResults of
+        true ->
+            io:format(
+                "Starting ~p local worker actors on ~p schedulers.~n",
+                [
+                    WorkerCount,
+                    erlang:system_info(schedulers_online)
+                ]
+            );
+        false ->
+            ok
+    end,
 
     {Workers, NextStart} =
         start_workers(
@@ -91,7 +98,8 @@ boss_init(
             TotalWork,
             GatorLinkId,
             0,
-            #{}
+            #{},
+            PrintResults
         ),
 
     boss_loop(
@@ -104,6 +112,7 @@ boss_init(
         PrintResults
     ).
 
+%% Start local workers and immediately give each one a work unit.
 start_workers(
     0,
     _K,
@@ -111,7 +120,8 @@ start_workers(
     _TotalWork,
     _GatorLinkId,
     NextStart,
-    Workers
+    Workers,
+    _PrintResults
 ) ->
     {Workers, NextStart};
 
@@ -122,7 +132,8 @@ start_workers(
     TotalWork,
     GatorLinkId,
     NextStart,
-    Workers
+    Workers,
+    PrintResults
 ) ->
     case NextStart < TotalWork of
         true ->
@@ -145,10 +156,20 @@ start_workers(
                 End
             },
 
+            case PrintResults of
+                true ->
+                    io:format(
+                        "Assigned local worker ~p: ~p-~p~n",
+                        [WorkerPid, NextStart, End]
+                    );
+                false ->
+                    ok
+            end,
+
             UpdatedWorkers =
                 maps:put(
                     WorkerPid,
-                    {NextStart, End},
+                    {NextStart, End, local},
                     Workers
                 ),
 
@@ -159,7 +180,8 @@ start_workers(
                 TotalWork,
                 GatorLinkId,
                 End + 1,
-                UpdatedWorkers
+                UpdatedWorkers,
+                PrintResults
             );
 
         false ->
@@ -177,7 +199,8 @@ boss_loop(
 ) ->
     receive
 
-        {register_worker, WorkerPid, _WorkerGatorLinkId} ->
+        %% A remote worker has joined the server.
+        {register_worker, WorkerPid, WorkerGatorLinkId} ->
             case NextStart < TotalWork of
                 true ->
                     End =
@@ -193,10 +216,24 @@ boss_loop(
                         End
                     },
 
+                    case PrintResults of
+                        true ->
+                            io:format(
+                                "Remote worker registered: ~p (~s)~n",
+                                [WorkerPid, WorkerGatorLinkId]
+                            ),
+                            io:format(
+                                "Assigned remote worker ~p: ~p-~p~n",
+                                [WorkerPid, NextStart, End]
+                            );
+                        false ->
+                            ok
+                    end,
+
                     NewWorkers =
                         maps:put(
                             WorkerPid,
-                            {NextStart, End},
+                            {NextStart, End, remote},
                             Workers
                         ),
 
@@ -213,6 +250,16 @@ boss_loop(
                 false ->
                     WorkerPid ! stop,
 
+                    case PrintResults of
+                        true ->
+                            io:format(
+                                "Remote worker ~p joined after all work was assigned.~n",
+                                [WorkerPid]
+                            );
+                        false ->
+                            ok
+                    end,
+
                     boss_loop(
                         K,
                         WorkUnit,
@@ -224,12 +271,16 @@ boss_loop(
                     )
             end;
 
-        {work_complete, WorkerPid, _Start, _End, Results} ->
+        %% A worker has completed its current work unit.
+        {work_complete, WorkerPid, Start, End, Results} ->
 
             case PrintResults of
                 true ->
-                    print_results(Results);
-
+                    print_results(Results),
+                    io:format(
+                        "Worker ~p completed ~p-~p.~n",
+                        [WorkerPid, Start, End]
+                    );
                 false ->
                     ok
             end,
@@ -255,10 +306,20 @@ boss_loop(
                         NewEnd
                     },
 
+                    case PrintResults of
+                        true ->
+                            io:format(
+                                "Assigned worker ~p: ~p-~p~n",
+                                [WorkerPid, NextStart, NewEnd]
+                            );
+                        false ->
+                            ok
+                    end,
+
                     NewWorkers =
                         maps:put(
                             WorkerPid,
-                            {NextStart, NewEnd},
+                            {NextStart, NewEnd, worker},
                             UpdatedWorkers
                         ),
 
@@ -277,10 +338,15 @@ boss_loop(
 
                     case maps:size(UpdatedWorkers) of
                         0 ->
-                            io:format(
-                                "Mining complete. Searched ~p candidates.~n",
-                                [TotalWork]
-                            ),
+                            case PrintResults of
+                                true ->
+                                    io:format(
+                                        "Mining complete. Searched ~p candidates.~n",
+                                        [TotalWork]
+                                    );
+                                false ->
+                                    ok
+                            end,
 
                             unregister(bitcoin_boss),
                             ok;
@@ -309,6 +375,321 @@ print_results([{Candidate, Hash} | Rest]) ->
     ),
 
     print_results(Rest).
+
+
+
+
+% -module(bitcoin_boss).
+
+% -export([
+%     start/2,
+%     start/3,
+%     start/4,
+%     start/5,
+%     start_silent/5
+% ]).
+
+% start(K, WorkUnit) ->
+%     start(
+%         K,
+%         WorkUnit,
+%         1000000,
+%         erlang:system_info(schedulers_online),
+%         "pr.shekhawat"
+%     ).
+
+% start(K, WorkUnit, GatorLinkId) ->
+%     start(
+%         K,
+%         WorkUnit,
+%         1000000,
+%         erlang:system_info(schedulers_online),
+%         GatorLinkId
+%     ).
+
+% start(K, WorkUnit, TotalWork, GatorLinkId) ->
+%     start(
+%         K,
+%         WorkUnit,
+%         TotalWork,
+%         erlang:system_info(schedulers_online),
+%         GatorLinkId
+%     ).
+
+% start(K, WorkUnit, TotalWork, WorkerCount, GatorLinkId) ->
+%     spawn(fun() ->
+%         boss_init(
+%             K,
+%             WorkUnit,
+%             TotalWork,
+%             WorkerCount,
+%             GatorLinkId,
+%             true
+%         )
+%     end).
+
+% start_silent(
+%     K,
+%     WorkUnit,
+%     TotalWork,
+%     WorkerCount,
+%     GatorLinkId
+% ) ->
+%     spawn(fun() ->
+%         boss_init(
+%             K,
+%             WorkUnit,
+%             TotalWork,
+%             WorkerCount,
+%             GatorLinkId,
+%             false
+%         )
+%     end).
+
+% boss_init(
+%     K,
+%     WorkUnit,
+%     TotalWork,
+%     WorkerCount,
+%     GatorLinkId,
+%     PrintResults
+% ) ->
+%     register(bitcoin_boss, self()),
+
+%     io:format(
+%         "Starting ~p worker actors on ~p schedulers.~n",
+%         [
+%             WorkerCount,
+%             erlang:system_info(schedulers_online)
+%         ]
+%     ),
+
+%     {Workers, NextStart} =
+%         start_workers(
+%             WorkerCount,
+%             K,
+%             WorkUnit,
+%             TotalWork,
+%             GatorLinkId,
+%             0,
+%             #{}
+%         ),
+
+%     boss_loop(
+%         K,
+%         WorkUnit,
+%         TotalWork,
+%         GatorLinkId,
+%         NextStart,
+%         Workers,
+%         PrintResults
+%     ).
+
+% start_workers(
+%     0,
+%     _K,
+%     _WorkUnit,
+%     _TotalWork,
+%     _GatorLinkId,
+%     NextStart,
+%     Workers
+% ) ->
+%     {Workers, NextStart};
+
+% start_workers(
+%     Count,
+%     K,
+%     WorkUnit,
+%     TotalWork,
+%     GatorLinkId,
+%     NextStart,
+%     Workers
+% ) ->
+%     case NextStart < TotalWork of
+%         true ->
+%             WorkerPid =
+%                 bitcoin_worker:start(
+%                     self(),
+%                     GatorLinkId
+%                 ),
+
+%             End =
+%                 min(
+%                     NextStart + WorkUnit - 1,
+%                     TotalWork - 1
+%                 ),
+
+%             WorkerPid ! {
+%                 work,
+%                 K,
+%                 NextStart,
+%                 End
+%             },
+
+%             UpdatedWorkers =
+%                 maps:put(
+%                     WorkerPid,
+%                     {NextStart, End},
+%                     Workers
+%                 ),
+
+%             start_workers(
+%                 Count - 1,
+%                 K,
+%                 WorkUnit,
+%                 TotalWork,
+%                 GatorLinkId,
+%                 End + 1,
+%                 UpdatedWorkers
+%             );
+
+%         false ->
+%             {Workers, NextStart}
+%     end.
+
+% boss_loop(
+%     K,
+%     WorkUnit,
+%     TotalWork,
+%     GatorLinkId,
+%     NextStart,
+%     Workers,
+%     PrintResults
+% ) ->
+%     receive
+
+%         {register_worker, WorkerPid, _WorkerGatorLinkId} ->
+%             case NextStart < TotalWork of
+%                 true ->
+%                     End =
+%                         min(
+%                             NextStart + WorkUnit - 1,
+%                             TotalWork - 1
+%                         ),
+
+%                     WorkerPid ! {
+%                         work,
+%                         K,
+%                         NextStart,
+%                         End
+%                     },
+
+%                     NewWorkers =
+%                         maps:put(
+%                             WorkerPid,
+%                             {NextStart, End},
+%                             Workers
+%                         ),
+
+%                     boss_loop(
+%                         K,
+%                         WorkUnit,
+%                         TotalWork,
+%                         GatorLinkId,
+%                         End + 1,
+%                         NewWorkers,
+%                         PrintResults
+%                     );
+
+%                 false ->
+%                     WorkerPid ! stop,
+
+%                     boss_loop(
+%                         K,
+%                         WorkUnit,
+%                         TotalWork,
+%                         GatorLinkId,
+%                         NextStart,
+%                         Workers,
+%                         PrintResults
+%                     )
+%             end;
+
+%         {work_complete, WorkerPid, _Start, _End, Results} ->
+
+%             case PrintResults of
+%                 true ->
+%                     print_results(Results);
+
+%                 false ->
+%                     ok
+%             end,
+
+%             UpdatedWorkers =
+%                 maps:remove(
+%                     WorkerPid,
+%                     Workers
+%                 ),
+
+%             case NextStart < TotalWork of
+%                 true ->
+%                     NewEnd =
+%                         min(
+%                             NextStart + WorkUnit - 1,
+%                             TotalWork - 1
+%                         ),
+
+%                     WorkerPid ! {
+%                         work,
+%                         K,
+%                         NextStart,
+%                         NewEnd
+%                     },
+
+%                     NewWorkers =
+%                         maps:put(
+%                             WorkerPid,
+%                             {NextStart, NewEnd},
+%                             UpdatedWorkers
+%                         ),
+
+%                     boss_loop(
+%                         K,
+%                         WorkUnit,
+%                         TotalWork,
+%                         GatorLinkId,
+%                         NewEnd + 1,
+%                         NewWorkers,
+%                         PrintResults
+%                     );
+
+%                 false ->
+%                     WorkerPid ! stop,
+
+%                     case maps:size(UpdatedWorkers) of
+%                         0 ->
+%                             io:format(
+%                                 "Mining complete. Searched ~p candidates.~n",
+%                                 [TotalWork]
+%                             ),
+
+%                             unregister(bitcoin_boss),
+%                             ok;
+
+%                         _ ->
+%                             boss_loop(
+%                                 K,
+%                                 WorkUnit,
+%                                 TotalWork,
+%                                 GatorLinkId,
+%                                 NextStart,
+%                                 UpdatedWorkers,
+%                                 PrintResults
+%                             )
+%                     end
+%             end
+%     end.
+
+% print_results([]) ->
+%     ok;
+
+% print_results([{Candidate, Hash} | Rest]) ->
+%     io:format(
+%         "~s\t~s~n",
+%         [Candidate, Hash]
+%     ),
+
+%     print_results(Rest).
 
 
 
