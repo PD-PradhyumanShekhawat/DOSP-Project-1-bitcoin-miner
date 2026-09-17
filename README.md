@@ -62,6 +62,11 @@ Run the unit tests:
 erl -noshell -pa ebin -eval 'eunit:test(bitcoin_tests, [verbose]), halt().'
 ```
 
+Start Erlang with the compiled modules:
+```bash
+erl -pa ebin
+```
+
 The current local entry point accepts the required number of leading zeroes:
 ```erlang
 bitcoin:main(["4"]).
