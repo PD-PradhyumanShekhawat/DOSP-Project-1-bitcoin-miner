@@ -1,0 +1,14 @@
+Final k=4 Results
+=================
+
+Coins found: 9
+
+Real time: 1.21 seconds
+User time: 6.66 seconds
+System time: 0.30 seconds
+CPU time: 6.960 seconds
+CPU/REAL ratio: 5.752
+
+Highest-zero coin:
+4
+pr.shekhawat;384638	0000261c062882e7487951b7b6efbfba36f727328a4eb325e855c67c24e28ad9
