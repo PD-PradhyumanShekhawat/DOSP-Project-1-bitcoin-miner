@@ -8,7 +8,7 @@
 
 
 mine_range(K, Start, End) ->                                %%  Search all candidate numbers from Start to End, and 
-    mine_range(K, Start, End, "55742970").         %%  return the ones whose hashes have at least K leading zeroes
+    mine_range(K, Start, End, "pr.shekhawat").         %%  return the ones whose hashes have at least K leading zeroes
 
 mine_range(K, Start, End, GatorLinkId) ->
     mine_range(K, Start, End, GatorLinkId, []).
