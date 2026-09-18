@@ -1,192 +1,351 @@
-# COP5615 Project 1 — Bitcoin Miner
+# COP5615 Project 1 - Bitcoin Miner
 
-READ ME file for Distributed Operating System Principles - Project 1 Due Date: September 21st September,2026
+Distributed Operating Systems Principles — Project 1
 
+## Team
 
-Team: Awesome Blossom (`TODO`: Don't forget to change this before submission)
-
-Group members:
-
-Pradhyuman Singh Shekhawat, UFID: 55742970, Email: pr.shekhawat@ufl.edu
-Keerthana ______P________,  UFID: , Email: 
+- Pradhyuman Singh Shekhawat, UFID: 55742970, Email: pr.shekhawat@ufl.edu
+- Keerthana Prabhakaran, UFID: 20255736 , Email: kprabhakaran@ufl.edu
 
 ## Project Overview
 
-The program searches for strings whose SHA-256 hash starts with a specified number of zeroes. 
-The mining work is divided into ranges and processed by worker actors under the control of a boss actor.
+This project implements a Bitcoin-like miner in Erlang using the Actor Model.
 
-The implementation is designed to make use of multiple CPU cores and to support distributed workers running on other machines.
+The program searches for candidate strings whose SHA-256 hash begins with a specified
+number of leading zeroes. Mining work is divided into ranges and assigned to worker
+actors by a boss actor.
 
-## Current Implementation
+The implementation supports:
 
-The project currently includes:
+- SHA-256 hashing
+- Leading-zero verification
+- GatorLink ID prefixed candidate generation
+- Actor-based parallelism
+- Multiple CPU cores
+- Dynamic work allocation
+- Distributed workers on other machines
+- Automated testing
+- Work-unit benchmarking
 
-- SHA-256 hashing using Erlang's `crypto` module
-- Verification of hashes with a required number of leading zeroes
-- Candidate generation using a GatorLink ID and nonce
-- Worker actors for processing ranges of candidate values
-- A boss actor that assigns work to workers
-- Dynamic assignment of new work when a worker finishes its current range
-- Multiple worker actors running concurrently
-- Use of the available Erlang schedulers for local parallel execution
-- Command-line entry point for starting the miner
+## Requirements
+
+For a required value of `k`, the program searches for candidate strings whose
+SHA-256 hash begins with `k` zeroes.
+
+For example:
+
+```text
+k = 4
+```
+
+requires hashes beginning with:
+
+```text
+0000
+```
+
+Each candidate has the form:
+
+```text
+pr.shekhawat;<nonce>
+```
+
+The output format is:
+
+```text
+input<TAB>SHA-256-hash
+```
+
+The project specification also requires the following SHA-256 result:
+
+```text
+Input:
+COP5615 is a boring class
+
+SHA-256:
+fb4431b6a2df71b6cbad961e08fa06ee6fff47e3bc14e977f4b2ea57caee48a4
+```
 
 ## Project Structure
 
 ```text
 DOSP-Project-1-bitcoin-miner/
 ├── src/
-│   ├── bitcoin.erl
-│   ├── bitcoin_boss.erl
-│   ├── bitcoin_worker.erl
-│   ├── bitcoin_miner.erl
-│   └── bitcoin_utils.erl
+│   ├── actors/
+│   │   ├── bitcoin_boss.erl
+│   │   └── bitcoin_worker.erl
+│   ├── core/
+│   │   ├── bitcoin.erl
+│   │   └── bitcoin_miner.erl
+│   └── utils/
+│       └── bitcoin_utils.erl
 ├── test/
+│   └── bitcoin_tests.erl
 ├── benchmark/
+│   ├── bitcoin_benchmark.erl
+│   └── run_benchmark.sh
 ├── docs/
+│   ├── benchmark_results.csv
+│   ├── k4_output.txt
+│   ├── k4_time.txt
+│   ├── k4_summary.txt
+│   └── k4_highest_zero.txt
+├── run_k4.sh
 ├── Makefile
 ├── README.md
 └── .gitignore
+```
 
+## Implementation
 
-Source Files
+### Actor Model
 
-1. bitcoin.erl
+The mining computation is organized using Erlang actors.
 
-Command-line entry point for the program.
+The boss actor:
 
-2. bitcoin_boss.erl
+1. Creates and manages worker actors.
+2. Divides the nonce search space into work units.
+3. Assigns ranges to workers.
+4. Receives completed results from workers.
+5. Assigns additional work when workers become available.
+6. Tracks the completion of the complete search space.
 
-Coordinates the mining process. It creates worker actors, assigns ranges of work,
- receives completed results, and assigns additional work to available workers.
+Each worker actor receives a range of candidate nonces, performs the SHA-256
+calculations, and sends discovered coins back to the boss.
 
-3. bitcoin_worker.erl
+This allows multiple workers to operate concurrently while keeping work allocation
+centralized in the boss actor.
 
-Worker actor responsible for receiving a range of candidate values, 
-mining that range, and returning any valid coins to the boss.
+### Multi-Core Execution
 
-4. bitcoin_miner.erl
+The local server creates worker actors based on the number of online Erlang
+schedulers.
 
-Performs the actual mining operation over a given range.
+For the final measurement machine:
 
-5. bitcoin_utils.erl
+```text
+8 schedulers
+8 worker actors
+```
 
-Contains utility functions for candidate generation, SHA-256 hash conversion, 
-and leading-zero verification.
+The CPU/REAL-time ratio from the final run was:
 
+```text
+5.655
+```
 
-Running the Program
+which demonstrates concurrent CPU utilization across multiple schedulers.
 
-Compile the source files:
+## Running the Program
 
-erlc -o ebin src/*.erl
+Compile the project:
 
+```bash
+rm -rf ebin
+mkdir ebin
 
-Start Erlang with the compiled modules:
+erlc -o ebin src/actors/*.erl src/core/*.erl src/utils/*.erl
+```
 
+Start Erlang:
+
+```bash
 erl -pa ebin
+```
 
+Run the miner by specifying the required number of leading zeroes:
 
-The current local entry point accepts the required number of leading zeroes:
-
+```erlang
 bitcoin:main(["4"]).
+```
 
+For `k = 4`, the program searches for hashes beginning with four zeroes.
 
-For example, 4 searches for hashes beginning with:
+## Distributed Mining
 
-0000
+The program can also operate with workers running on other machines.
 
+### Server
 
-The program prints each valid coin found by the server in the following format:
+The server is started by providing the required number of leading zeroes:
 
-input<TAB>SHA-256-hash
-Required Hash Verification
-
-
-The project specification requires:
-
-COP5615 is a boring class
-
-to produce:
-
-fb4431b6a2df71b6cbad961e08fa06ee6fff47e3bc14e977f4b2ea57caee48a4
-
-
-The implementation uses SHA-256 for the required hashing operation.
-
-
-Actor Model
-
-The mining work is divided among worker actors.
-
-The boss actor maintains the work allocation and gives each worker a range of candidate values. 
-When a worker finishes, it sends the results back to the boss and receives another range when more work is available.
-
-This allows multiple workers to operate concurrently while keeping work allocation centralized in the boss.
-
-
-Distributed Mining
-
-The final implementation will allow a worker running on another machine to connect to the server and receive mining work.
-
-The intended usage is:
-
-
-Server:
+```text
 bitcoin <number_of_zeroes>
+```
 
-Worker:
+For example:
+
+```text
+bitcoin 4
+```
+
+The server creates local worker actors and waits for remote workers to connect.
+
+### Remote Worker
+
+A worker can connect to a server by providing the server IP address:
+
+```text
 bitcoin <server_ip>
+```
 
-Remote workers will not print mining results. Results will be returned to the server, 
-which is responsible for displaying the discovered coins.
+For example:
 
-Performance
+```text
+bitcoin 192.168.40.197
+```
 
-The project requires measuring the effect of different work-unit sizes.
+Remote workers do not display mining results. They receive work from the server,
+perform the assigned mining computation, and return the results to the server.
+The server is responsible for displaying the discovered coins.
 
-A work unit is the number of candidate sub-problems assigned to a worker in one request from the boss.
+Communication between the boss and workers uses Erlang process messaging and
+distributed Erlang nodes.
 
-The final report will include:
+## Performance
 
-Work-unit size used for the final implementation
-How the work-unit size was selected
-Runtime for k = 4
-CPU time
-Real time
-CPU/Real time ratio
-Largest number of working machines used
-Coin found with the greatest number of leading zeroes
-Results
+A work unit is the number of candidate sub-problems assigned to a worker in a
+single request from the boss.
 
-To be completed after the final benchmarking and distributed tests.
+Different work-unit sizes were benchmarked using `k = 4` and a total search space
+of one million candidates.
 
-Testing
+The benchmark results were:
 
-Testing will cover:
+| Work unit | Real time | User time | System time | CPU time | CPU/REAL |
+|---:|---:|---:|---:|---:|---:|
+| 1,000 | 1.14 s | 6.56 s | 0.24 s | 6.80 s | 5.965 |
+| 5,000 | 1.10 s | 6.54 s | 0.28 s | 6.82 s | 6.200 |
+| 10,000 | 1.10 s | 6.52 s | 0.29 s | 6.81 s | 6.191 |
+| 50,000 | 1.24 s | 6.41 s | 0.27 s | 6.68 s | 5.387 |
+| 100,000 | 1.50 s | 6.22 s | 0.25 s | 6.47 s | 4.313 |
 
-SHA-256 verification
-Candidate generation
-Leading-zero validation
-Mining over a range
-Worker/boss communication
-Multiple local workers
-Distributed workers
-Final k = 4 execution
+The `5,000` work-unit size was selected from this benchmark because it achieved
+the lowest measured real time, tied with `10,000`, while also producing the
+highest CPU/REAL ratio in the measured runs.
 
+The final implementation uses a work unit of:
 
-Requirements
+```text
+10,000 candidates
+```
 
-This project is implemented in Erlang and uses the Actor Model for parallel and distributed computation.
+The difference between 5,000 and 10,000 was small in this benchmark, so the
+final implementation retained 10,000 as the configured value.
 
-The final implementation follows the project requirements for:
+Performance varies with hardware and system load.
 
-SHA-256 hashing
-Leading-zero mining
-GatorLink ID prefixing
-Actor-based parallelism
-Dynamic work allocation
-Multi-core execution
-Distributed workers
-Performance measurement
+## Final k = 4 Results
 
+The final local execution used:
+
+```text
+k = 4
+Total candidates = 1,000,000
+Worker actors = 8
+Schedulers = 8
+```
+
+The final run found:
+
+```text
+Coins found: 9
+
+Real time: 1.19 seconds
+User time: 6.50 seconds
+System time: 0.23 seconds
+CPU time: 6.730 seconds
+CPU/REAL ratio: 5.655
+```
+
+The nine valid coins found were:
+
+```text
+pr.shekhawat;384638     0000261c062882e7487951b7b6efbfba36f727328a4eb325e855c67c24e28ad9
+pr.shekhawat;531213     00004b62d9c40c384759777dfb56a4054bafdfbbd5b372ebd5a5c74b84b4e957
+pr.shekhawat;548978     00003e2d5da3f6b8928946a42cefca9dfbcf629d1a58bc1ce27f757307b35f4b
+pr.shekhawat;549988     00003775d931492340880ea1850c8f696c779a9bc09d9c1c8ac915bf0f42fad3
+pr.shekhawat;569273     00005b1e8bf568f6627f83845289b73c0952c5285a8eff4c38c37b68d7af538b
+pr.shekhawat;758163     000057e301107c11b3fa09c44bba7785685375fe61c99858c0db19bad7deacff
+pr.shekhawat;844952     0000eab08bcb26bbdad7c7f4364d02cc4e8ad7eb2c8aa08af3b93e5e4f2487b3
+pr.shekhawat;895091     00007e70e7208dd692ab45fb57142701406657ea8db210879be566174d9ef1b0
+pr.shekhawat;988854     0000e37a4e74c52015d4a14a81f498a40adb410ebbbb02e28c0ca8db446e954f
+```
+
+### Coin with the Most Leading Zeroes
+
+The coin with the greatest number of leading zeroes found in the final run was:
+
+```text
+pr.shekhawat;384638
+```
+
+with:
+
+```text
+0000261c062882e7487951b7b6efbfba36f727328a4eb325e855c67c24e28ad9
+```
+
+This hash contains four leading zeroes.
+
+## Testing
+
+The project includes an EUnit test suite covering:
+
+- SHA-256 hashing
+- Hash-to-hex conversion
+- Leading-zero detection
+- Candidate generation
+- Mining over ranges
+- The required problem-statement hash
+- Worker behavior
+- Boss/work allocation behavior
+- Multiple worker execution
+
+Final test result:
+
+```text
+Passed: 21
+Failed: 0
+```
+
+## Distributed Testing
+
+The distributed implementation was tested using:
+
+```text
+Server:
+MacBook Pro
+8 schedulers
+
+Remote worker:
+Windows laptop
+4 schedulers
+```
+
+The remote worker operates without displaying mining results; discovered coins
+are returned to the server.
+
+The distributed implementation uses Erlang's actor/process messaging model for
+communication between the server and remote worker.
+
+## Documentation
+
+Additional measurements and final execution artifacts are stored in `docs/`:
+
+- `benchmark_results.csv` — work-unit benchmark measurements
+- `k4_output.txt` — complete final `k = 4` mining output
+- `k4_time.txt` — timing information
+- `k4_summary.txt` — final performance summary
+- `k4_highest_zero.txt` — highest leading-zero result
+
+## Summary
+
+The project implements a parallel and distributed Bitcoin-like miner using Erlang
+actors. The boss actor manages the search space and dynamically assigns ranges to
+worker actors. Workers independently perform SHA-256 mining and return valid
+coins to the boss.
+
+The final local `k = 4` execution searched one million candidates using eight
+worker actors and produced nine valid coins with a CPU/REAL-time ratio of 5.655.
