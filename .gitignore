@@ -1,11 +1,2 @@
-# Erlang compiled files
 *.beam
 ebin/
-
-# macOS
-.DS_Store
-
-# Benchmark temporary files
-benchmark/time.txt
-
-last_command.txt
