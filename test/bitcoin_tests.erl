@@ -39,27 +39,26 @@ hash_to_hex_parameterized_test_() ->
     ].
 
 problem_statement_example_test() ->
-    Candidate =
-        <<"pr.shekhawat;12345">>,
-
-    Hash =
-        crypto:hash(
-            sha256,
-            Candidate
-        ),
-
-    HexHash =
-        bitcoin_utils:hash_to_hex(Hash),
+    Candidate = <<"pr.shekhawat;12345">>,
+    Hash = crypto:hash(sha256, Candidate),
+    HexHash = bitcoin_utils:hash_to_hex(Hash),
 
     ?assertEqual(
         "04e793629c46e2a7daee842acfd3351a878ac66254af50b3e6ce5b413a85d537",
         HexHash
     ),
 
-    ?assertNot(
+    ?assert(
         bitcoin_utils:has_leading_zeroes(
             HexHash,
             1
+        )
+    ),
+
+    ?assertNot(
+        bitcoin_utils:has_leading_zeroes(
+            HexHash,
+            2
         )
     ).
 

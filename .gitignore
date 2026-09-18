@@ -7,3 +7,5 @@ ebin/
 
 # Benchmark temporary files
 benchmark/time.txt
+
+last_command.txt
