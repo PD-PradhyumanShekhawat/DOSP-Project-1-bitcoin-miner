@@ -3,11 +3,11 @@ Final k=4 Results
 
 Coins found: 9
 
-Real time: 1.21 seconds
-User time: 6.66 seconds
-System time: 0.30 seconds
-CPU time: 6.960 seconds
-CPU/REAL ratio: 5.752
+Real time: 1.19 seconds
+User time: 6.50 seconds
+System time: 0.23 seconds
+CPU time: 6.730 seconds
+CPU/REAL ratio: 5.655
 
 Highest-zero coin:
 4
