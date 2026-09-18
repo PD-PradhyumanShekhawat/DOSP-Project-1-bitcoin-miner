@@ -12,9 +12,10 @@ main([Argument]) ->
     end.
 
 start_server(K) ->
-    WorkUnit = 10000,
-    TotalWork = 1000000,
+    WorkUnit = 1000,
+    TotalWork = 100000,
     WorkerCount = erlang:system_info(schedulers_online),
+
     GatorLinkId = "kprabhakaran",
 
     BossPid =
@@ -23,10 +24,10 @@ start_server(K) ->
     wait_for_boss(BossPid).
 
 start_worker(ServerIP) ->
-    GatorLinkId = "kprabhakaran",
+    GatorLinkId = "pr.shekhawat",
 
     ServerNode = list_to_atom("bitcoin_server@" ++ ServerIP),
-
+io:format("Server node: ~p~n", [ServerNode]),
     bitcoin_worker:start_remote(ServerNode, GatorLinkId),
 
     wait_forever().

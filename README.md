@@ -64,7 +64,7 @@ erl -noshell -pa ebin -eval 'eunit:test(bitcoin_tests, [verbose]), halt().'
 
 Start Erlang with the compiled modules:
 ```bash
-erl -pa ebin
+erl -name bitcoin_server@192.168.0.14 -setcookie bitcoin_cookie -kernel inet_dist_listen_min 54031 inet_dist_listen_max 54031 -pa ebin
 ```
 
 The current local entry point accepts the required number of leading zeroes:
@@ -79,7 +79,7 @@ For example, 4 searches for hashes beginning with:
 
 The program prints each valid coin found by the server in the following format:
 ```text
-input SHA-256-hash
+input;nonce SHA-256-hash
 ```
 
 ## 
@@ -112,6 +112,11 @@ bitcoin <number_of_zeroes>
 ```text
 bitcoin <server_ip>
 ```
+
+
+## Output
+![Server](images/server.jpg)
+![Client](images/client.jpg)
 
 ## Performance
 The work unit is the number of candidate sub-problems assigned to a worker in one
