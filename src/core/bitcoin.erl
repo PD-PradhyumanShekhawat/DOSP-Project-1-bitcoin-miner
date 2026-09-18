@@ -21,7 +21,7 @@ start_server(K) ->
     TotalWork = 1000000,
     WorkerCount =
         erlang:system_info(schedulers_online),
-    GatorLinkId = "pr.shekhawat",
+    GatorLinkId = "kprabhakaran",
 
     BossPid =
         bitcoin_boss:start(
