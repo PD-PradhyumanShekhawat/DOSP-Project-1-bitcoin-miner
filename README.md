@@ -114,51 +114,17 @@ bitcoin <number_of_zeroes>
 bitcoin <server_ip>
 ```
 
+
+## Result
+|Parameter|Result|Screenshot|
+|---|----------------|--|
+|4 coins|WorkUnit 10000;TotalWork  10000000 |![Server](images/server1_prefix4.png) ![Client](images/client1_prefix4.png)|
+|Coin with most 0s kprabhakaran | 5 | ![kprabhakaran](images/coin_with_most_zeros_kprabhakaran.png)|
+|Coin with most 0s pr.shekhawat | 5  |![pr.shekhawat](images/coin_with_most_0s_prshekhawat.png)|
+| Largest number of working machines/laptops tested| 2| |
+
 ## Performance
-The work unit is the number of candidate sub-problems assigned to a worker in one
-request from the boss. The measurements below used `k = 4`, one million total
-candidates, and the number of schedulers reported by
-`erlang:system_info(schedulers_online)`.
-
-The implementation is currently configured with a work unit of `10,000`
-candidates. The result below is a measurement of that configuration; Results vary with hardware
-and system load.
-
-| Work unit | Real time | CPU time | CPU/real ratio |
-|---:|---:|---:|---:|
-| 10,000 | 0.93 seconds | 6.23 seconds | 6.70 |
-
-For the configured work unit, the `k = 4` run searched one million candidates and
-produced these valid results:
-```text
-kprabhakaran;78238  0000fc9bd6afb4e7dd30bff2a9f801b6804d7ec3fdddcfc48f2df7b6a0e585b5
-kprabhakaran;78522  0000e1e3a2acb408262b53969a112f7e837090c62ee62149c767dc3480f6e9eb
-kprabhakaran;92671  0000705faf94d50e48e2f60f28941207f18005695aa1359ac0198d5fae75fcb4
-kprabhakaran;97494  00009d2473ad7c87fe92487acd95455646acf79ab7050b376128d0014615288c
-kprabhakaran;109809 0000eaa5bea24d16295ca50a6a006a1cf4533001d9c3db3b636b3abc2cd9c297
-kprabhakaran;182373 0000a410c2ac1c7d673ba3eac5cfa146ea95be4a1b9d624bede000f498a6502f
-kprabhakaran;307605 0000f1454ed01f3003ec10630e20711342547669ff44ee6143ca9c28c267a0f5
-kprabhakaran;318740 00000fbac30dde39d7f1510e2e5279f6d58e417584f25e70e3f237e284d3aa8d
-kprabhakaran;425956 00007657795b1a50efa6fe8043ab5ecfe8eb210c926b31af986e783aacec17e0
-kprabhakaran;502086 00000155cb961955801055882f43ec7d25625bb4f82a6ec00662270f757094d7
-kprabhakaran;526279 00005b936236eabf92d6bc4288ead15ea24a70470525f0be9e2ebc5ba45c20c2
-kprabhakaran;734747 000045c62b9b1b38178b7ac1ecd3b796fadfc98069ce3ce8d6613e4d2a0887ff
-kprabhakaran;732964 000085e690b65d543557f82b53dbffe34e17b2b09c5c9e6754c22160e21dbad0
-kprabhakaran;763526 000073723c59193ebdcaaa3ac48906b41c0d710a3c0b354f476eedaae6a0aafa
-kprabhakaran;908862 0000c4b689b78c5e98a0c8d12038a593eaa69b41bdf3e4c0e690ac47553c5b0b
-```
-
-The highest result observed in that run had five
-leading zeroes:
-```text
-kprabhakaran;318740 00000fbac30dde39d7f1510e2e5279f6d58e417584f25e70e3f237e284d3aa8d
-kprabhakaran;502086 00000155cb961955801055882f43ec7d25625bb4f82a6ec00662270f757094d7
-```
-
-
-## Output for 4 coins
-![Server](images/server1_prefix4.png)
-![Client](images/client1_prefix4.png)
+TBD
 
 ## Running Time and Parallelism
 
@@ -192,12 +158,6 @@ the client has relatively little local CPU utilization. This proves distributed 
 performed by the server.
 
 
-## Result
-|Parameter|Result|Screenshot|
-|---|----------------|--|
-|Coin with most 0s kprabhakaran | 5 | ![kprabhakaran](images/coin_with_most_zeros_kprabhakaran.png)|
-|Coin with most 0s pr.shekhawat | 5  |![pr.shekhawat](images/coin_with_most_0s_prshekhawat.png)|
-| Largest number of working machines/laptops tested| 2| |
 ## Summary
 
 The project implements a parallel and distributed Bitcoin-like miner using Erlang
