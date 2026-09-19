@@ -12,8 +12,8 @@ main([Argument]) ->
     end.
 
 start_server(K) ->
-    WorkUnit = 1000,
-    TotalWork = 100000,
+    WorkUnit = 10000,
+    TotalWork = 10000000,
     WorkerCount = erlang:system_info(schedulers_online),
 
     GatorLinkId = "kprabhakaran",
