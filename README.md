@@ -78,9 +78,11 @@ For example, 4 searches for hashes beginning with:
 0000
 ```
 
-The program prints each valid coin found by the server in the following format:
+The server prints each valid coin as an independent line in the following
+format, with the input string and SHA-256 hash separated by a TAB:
+
 ```text
-input;nonce SHA-256-hash
+input;nonce<TAB>SHA-256-hash
 ```
 
 ## 
