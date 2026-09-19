@@ -114,42 +114,6 @@ bitcoin <number_of_zeroes>
 bitcoin <server_ip>
 ```
 
-
-## Output
-![Server](images/server1_prefix4.png)
-![Client](images/client1_prefix4.png)
-
-## Running Time and Parallelism
-
-The execution times were measured separately on the client and server using
-the `time` command.
-
-#### Client
-
-- **Real time:** 24.726 seconds
-- **User CPU time:** 6.33 seconds
-- **System CPU time:** 0.31 seconds
-- **Total CPU time:** 6.64 seconds
-- **CPU/Real ratio:** $6.64 / 24.726 \approx 0.27$
-
-Thus, the client used approximately **0.27 effective CPU cores** during
-the computation.
-
-#### Server
-
-- **Real time:** 14.619 seconds
-- **User CPU time:** 58.17 seconds
-- **System CPU time:** 1.81 seconds
-- **Total CPU time:** 59.98 seconds
-- **CPU/Real ratio:** $59.98 / 14.619 \approx 4.10$
-
-Thus, the server used approximately **4.10 effective CPU cores** during
-the computation.
-
-The server therefore shows significant parallel CPU utilization, while
-the client has relatively little local CPU utilization. This proves distributed computation where most of the computational work is
-performed by the server.
-
 ## Performance
 The work unit is the number of candidate sub-problems assigned to a worker in one
 request from the boss. The measurements below used `k = 4`, one million total
@@ -192,16 +156,48 @@ kprabhakaran;502086 00000155cb961955801055882f43ec7d25625bb4f82a6ec00662270f7570
 ```
 
 
-## Coin with the most 0s
-| GatorLinkID | Coin |Screeshot|
+## Output for 4 coins
+![Server](images/server1_prefix4.png)
+![Client](images/client1_prefix4.png)
+
+## Running Time and Parallelism
+
+The execution times were measured separately on the client and server using
+the `time` command.
+
+#### Client
+
+- **Real time:** 24.726 seconds
+- **User CPU time:** 6.33 seconds
+- **System CPU time:** 0.31 seconds
+- **Total CPU time:** 6.64 seconds
+- **CPU/Real ratio:** $6.64 / 24.726 \approx 0.27$
+
+Thus, the client used approximately **0.27 effective CPU cores** during
+the computation.
+
+#### Server
+
+- **Real time:** 14.619 seconds
+- **User CPU time:** 58.17 seconds
+- **System CPU time:** 1.81 seconds
+- **Total CPU time:** 59.98 seconds
+- **CPU/Real ratio:** $59.98 / 14.619 \approx 4.10$
+
+Thus, the server used approximately **4.10 effective CPU cores** during
+the computation.
+
+The server therefore shows significant parallel CPU utilization, while
+the client has relatively little local CPU utilization. This proves distributed computation where most of the computational work is
+performed by the server.
+
+
+## Result
+|Parameter|Result|Screenshot|
 |---|----------------|--|
-|kprabhakaran| 5| ![kprabhakaran](images/coin_with_most_zeros_kprabhakaran.png)|
-|pr.shekhawat |5|![pr.shekhawat](images/coin_with_most_0s_prshekhawat.png)|
-
-
-
-
-
+|Coin with most 0s kprabhakaran | 5 | ![kprabhakaran](images/coin_with_most_zeros_kprabhakaran.png)|
+|Coin with most 0s pr.shekhawat | 5  |![pr.shekhawat](images/coin_with_most_0s_prshekhawat.png)|
+| Largest number of working machines/laptops tested| 2| |
 ## Summary
 
 The project implements a parallel and distributed Bitcoin-like miner using Erlang
