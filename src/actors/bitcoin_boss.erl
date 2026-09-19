@@ -186,8 +186,8 @@ boss_loop(
         {
             work_complete,
             WorkerPid,
-            Start,
-            End,
+            _Start,
+            _End,
             Results
         } ->
             case maps:is_key(WorkerPid, Workers) of
@@ -287,7 +287,7 @@ print_results(Results, true) ->
     lists:foreach(
         fun({Candidate, Hash}) ->
             io:format(
-                "~s~t~s~n",
+                "~s\t~s~n",
                 [
                     binary_to_list(Candidate),
                     Hash
