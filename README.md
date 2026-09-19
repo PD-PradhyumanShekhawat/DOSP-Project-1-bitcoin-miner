@@ -4,6 +4,7 @@ This project is implemented in Erlang and uses the Actor Model for parallel and 
 
 ## Group members:
 Pradhyuman Singh Shekhawat, UFID: 55742970, Email: [pr.shekhawat@ufl.edu](mailto\:pr.shekhawat@ufl.edu)
+
 Keerthana Prabhakaran,  UFID: 20255736 , Email: [kprabhakaran@ufl.edu](mailto\:kprabhakaran@ufl.edu)
 
 ## Project Overview
