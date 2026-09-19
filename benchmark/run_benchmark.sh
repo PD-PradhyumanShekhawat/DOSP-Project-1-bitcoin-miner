@@ -15,7 +15,7 @@ do
 
     /usr/bin/time -p \
         erl -noshell -pa ebin \
-        -eval "bitcoin_benchmark:run([{4, $WORK_UNIT, 1000000}]), halt()." \
+        -eval "bitcoin_benchmark:run([{4, $WORK_UNIT, 10000000}]), halt()." \
         > /dev/null 2> "$TIME_FILE"
 
     REAL=$(awk '/^real / {print $2}' "$TIME_FILE")
