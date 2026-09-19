@@ -116,8 +116,8 @@ bitcoin <server_ip>
 
 
 ## Output
-![Server](images/server.jpg)
-![Client](images/client.jpg)
+![Server](images/server1_prefix4.png)
+![Client](images/client1_prefix4.png)
 
 ## Performance
 The work unit is the number of candidate sub-problems assigned to a worker in one
