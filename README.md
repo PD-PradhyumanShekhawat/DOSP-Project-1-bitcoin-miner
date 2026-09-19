@@ -192,15 +192,15 @@ kprabhakaran;502086 00000155cb961955801055882f43ec7d25625bb4f82a6ec00662270f7570
 ```
 
 
-## Documentation
+## Coin with the most 0s
+| GatorLinkID | Coin |Screeshot|
+|---|----------------|--|
+|kprabhakaran| 5| ![kprabhakaran](images/coin_with_most_zeros_kprabhakaran.png)|
+|pr.shekhawat |5|![pr.shekhawat](images/coin_with_most_0s_prshekhawat.png)|
 
-Additional measurements and final execution artifacts are stored in `docs/`:
 
-- `benchmark_results.csv` — work-unit benchmark measurements
-- `k4_output.txt` — complete final `k = 4` mining output
-- `k4_time.txt` — timing information
-- `k4_summary.txt` — final performance summary
-- `k4_highest_zero.txt` — highest leading-zero result
+
+
 
 ## Summary
 
@@ -210,5 +210,7 @@ worker actors. Workers independently perform SHA-256 mining and return valid
 coins to the boss.
 
 The final local `k = 4` execution searched one million candidates using eight
-worker actors and produced nine valid coins with a CPU/REAL-time ratio of 5.655.
+worker actors and produced nine valid coins with a CPU/REAL-time ratio of 4.10
+
+
 
