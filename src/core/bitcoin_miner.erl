@@ -1,14 +1,6 @@
 -module(bitcoin_miner).
 
--export([
-    mine_range/3,       % for convinient testing
-    mine_range/4        % This is the actual function used by the boss
-]).
-
-
-
-mine_range(K, Start, End) ->                                %%  Search all candidate numbers from Start to End, and 
-    mine_range(K, Start, End, "pr.shekhawat").         %%  return the ones whose hashes have at least K leading zeroes
+-export([mine_range/4]).
 
 mine_range(K, Start, End, GatorLinkId) ->
     mine_range(K, Start, End, GatorLinkId, []).
@@ -18,12 +10,21 @@ mine_range(_K, Current, End, _GatorLinkId, Results)
     lists:reverse(Results);
 
 mine_range(K, Current, End, GatorLinkId, Results) ->
-    Candidate = bitcoin_utils:make_candidate(GatorLinkId, Current),
+    Candidate =
+        bitcoin_utils:make_candidate(
+            GatorLinkId,
+            Current
+        ),
 
-    Hash = crypto:hash(sha256, Candidate),
+    Hash =
+        crypto:hash(
+            sha256,
+            Candidate
+        ),
 
-    HexHash = bitcoin_utils:hash_to_hex(Hash),
-    
+    HexHash =
+        bitcoin_utils:hash_to_hex(Hash),
+
     case bitcoin_utils:has_leading_zeroes(HexHash, K) of
         true ->
             mine_range(

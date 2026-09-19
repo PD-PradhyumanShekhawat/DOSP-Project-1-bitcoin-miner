@@ -1,11 +1,6 @@
-# Erlang compiled files
 *.beam
-ebin/
-
-# macOS
+*.dump
+erl_crash.dump
 .DS_Store
-
-# Benchmark temporary files
-benchmark/time.txt
-
-last_command.txt
+.vscode/
+.idea/

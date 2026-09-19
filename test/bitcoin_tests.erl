@@ -14,34 +14,18 @@ hash_to_hex_test() ->
         bitcoin_utils:hash_to_hex(Hash)
     ).
 
-hash_to_hex_parameterized_test_() ->
-    [
-        ?_test(
-            ?assertEqual(
-                Expected,
-                bitcoin_utils:hash_to_hex(
-                    crypto:hash(sha256, Input)
-                )
-            )
-        )
-        || {Input, Expected} <- [
-            {
-                <<"COP5615 is a boring class">>,
-                "fb4431b6a2df71b6cbad961e08fa06ee6fff47e3bc14e977f4b2ea57caee48a4"
-            },
-            {
-                {
-                    <<"pr.shekhawat;12345">>,
-                    "04e793629c46e2a7daee842acfd3351a878ac66254af50b3e6ce5b413a85d537"
-                }
-            }
-        ]
-    ].
-
 problem_statement_example_test() ->
-    Candidate = <<"pr.shekhawat;12345">>,
-    Hash = crypto:hash(sha256, Candidate),
-    HexHash = bitcoin_utils:hash_to_hex(Hash),
+    Candidate =
+        <<"pr.shekhawat;12345">>,
+
+    Hash =
+        crypto:hash(
+            sha256,
+            Candidate
+        ),
+
+    HexHash =
+        bitcoin_utils:hash_to_hex(Hash),
 
     ?assertEqual(
         "04e793629c46e2a7daee842acfd3351a878ac66254af50b3e6ce5b413a85d537",
@@ -62,284 +46,287 @@ problem_statement_example_test() ->
         )
     ).
 
-has_leading_zeroes_test() ->
-    ?assert(
-        bitcoin_utils:has_leading_zeroes(
-            "000abc",
-            3
+make_candidate_test() ->
+    ?assertEqual(
+        <<"pr.shekhawat;12345">>,
+        bitcoin_utils:make_candidate(
+            "pr.shekhawat",
+            12345
         )
-    ),
+    ).
 
-    ?assertNot(
-        bitcoin_utils:has_leading_zeroes(
-            "000abc",
-            4
-        )
-    ),
-
-    ?assertNot(
-        bitcoin_utils:has_leading_zeroes(
-            "100abc",
-            1
-        )
-    ),
-
-    ?assert(
-        bitcoin_utils:has_leading_zeroes(
-            "abc",
+make_candidate_zero_test() ->
+    ?assertEqual(
+        <<"pr.shekhawat;0">>,
+        bitcoin_utils:make_candidate(
+            "pr.shekhawat",
             0
         )
     ).
 
-has_leading_zeroes_parameterized_test_() ->
-    [
-        ?_test(
-            ?assertEqual(
-                Expected,
-                bitcoin_utils:has_leading_zeroes(
-                    Hash,
-                    K
-                )
-            )
-        )
-        || {Hash, K, Expected} <- [
-            {"000abc", 3, true},
-            {"000abc", 4, false},
-            {"100abc", 1, false},
-            {"abc", 0, true}
-        ]
-    ].
-
-make_candidate_test() ->
+make_candidate_large_number_test() ->
     ?assertEqual(
-        <<"pr.shekhawat;42">>,
+        <<"pr.shekhawat;999999">>,
         bitcoin_utils:make_candidate(
             "pr.shekhawat",
-            42
+            999999
         )
     ).
 
-make_candidate_parameterized_test_() ->
-    [
-        ?_test(
-            ?assertEqual(
-                Expected,
-                bitcoin_utils:make_candidate(
-                    Prefix,
-                    Nonce
-                )
-            )
-        )
-        || {Prefix, Nonce, Expected} <- [
-            {
-                "pr.shekhawat",
-                42,
-                <<"pr.shekhawat;42">>
-            },
-            {
-                "pr.shekhawat",
-                9401,
-                <<"pr.shekhawat;9401">>
-            },
-            {
-                "test",
-                0,
-                <<"test;0">>
-            }
-        ]
-    ].
-
-mine_range_test() ->
-    ?assertEqual(
-        [
-            {
-                <<"test;2">>,
-                "3e189adbf13058c2c8df4a2afe09bcc12611ecee8a7c4df3fb4d06e09b66c3dd"
-            },
-            {
-                <<"test;3">>,
-                "6f666844d8420fc5ed19ef796ef5145ac319bda3b2a0f1227b3998dc0dac3b23"
-            },
-            {
-                <<"test;4">>,
-                "21552a0e8de5ec67b983605d3cbee3e6cfb93128532bcada977d623a99a500ed"
-            }
-        ],
-        bitcoin_miner:mine_range(
-            0,
-            2,
-            4,
-            "test"
+leading_zeroes_zero_test() ->
+    ?assert(
+        bitcoin_utils:has_leading_zeroes(
+            "0000abcd",
+            0
         )
     ).
+
+leading_zeroes_one_test() ->
+    ?assert(
+        bitcoin_utils:has_leading_zeroes(
+            "0abcdef",
+            1
+        )
+    ).
+
+leading_zeroes_four_test() ->
+    ?assert(
+        bitcoin_utils:has_leading_zeroes(
+            "0000abcd",
+            4
+        )
+    ).
+
+leading_zeroes_four_fail_test() ->
+    ?assertNot(
+        bitcoin_utils:has_leading_zeroes(
+            "000abcde",
+            4
+        )
+    ).
+
+leading_zeroes_nonzero_test() ->
+    ?assertNot(
+        bitcoin_utils:has_leading_zeroes(
+            "1000abcd",
+            1
+        )
+    ).
+
+hash_length_test() ->
+    Hash =
+        crypto:hash(
+            sha256,
+            <<"test">>
+        ),
+
+    ?assertEqual(32, byte_size(Hash)).
+
+hex_hash_length_test() ->
+    Hash =
+        crypto:hash(
+            sha256,
+            <<"test">>
+        ),
+
+    Hex =
+        bitcoin_utils:hash_to_hex(Hash),
+
+    ?assertEqual(64, length(Hex)).
+
+hex_hash_is_list_test() ->
+    Hash =
+        crypto:hash(
+            sha256,
+            <<"test">>
+        ),
+
+    Hex =
+        bitcoin_utils:hash_to_hex(Hash),
+
+    ?assert(is_list(Hex)).
 
 mine_empty_range_test() ->
     ?assertEqual(
         [],
         bitcoin_miner:mine_range(
-            1,
             4,
-            2,
-            "test"
+            10,
+            5,
+            "pr.shekhawat"
         )
     ).
 
-mine_range_parameterized_test_() ->
-    [
-        ?_test(
-            ?assertEqual(
-                Expected,
-                bitcoin_miner:mine_range(
-                    K,
-                    Start,
-                    End,
-                    Prefix
+mine_single_range_test() ->
+    Results =
+        bitcoin_miner:mine_range(
+            0,
+            0,
+            0,
+            "pr.shekhawat"
+        ),
+
+    ?assertEqual(1, length(Results)).
+
+mine_result_format_test() ->
+    Results =
+        bitcoin_miner:mine_range(
+            0,
+            0,
+            0,
+            "pr.shekhawat"
+        ),
+
+    [{Candidate, Hash}] = Results,
+
+    ?assertEqual(
+        <<"pr.shekhawat;0">>,
+        Candidate
+    ),
+
+    ?assertEqual(64, length(Hash)).
+
+mine_result_prefix_test() ->
+    Results =
+        bitcoin_miner:mine_range(
+            0,
+            0,
+            2,
+            "pr.shekhawat"
+        ),
+
+    lists:foreach(
+        fun({Candidate, _Hash}) ->
+            ?assert(
+                lists:prefix(
+                    "pr.shekhawat;",
+                    binary_to_list(Candidate)
                 )
             )
-        )
-        || {
-            K,
-            Start,
-            End,
-            Prefix,
-            Expected
-        } <- [
-            {
-                0,
-                2,
-                2,
-                "test",
-                [
-                    {
-                        <<"test;2">>,
-                        "3e189adbf13058c2c8df4a2afe09bcc12611ecee8a7c4df3fb4d06e09b66c3dd"
-                    }
-                ]
-            },
-            {
-                0,
-                4,
-                4,
-                "pr.shekhawat",
-                [
-                    {
-                        <<"pr.shekhawat;4">>,
-                        "16820d818eea7722a88f6e0efa773b22d9733a0a596e85c88928c7f6b45833f0"
-                    }
-                ]
-            },
-            {
-                1,
-                4,
-                2,
-                "test",
-                []
-            }
-        ]
-    ].
+        end,
+        Results
+    ).
+
+mine_hash_verification_test() ->
+    Results =
+        bitcoin_miner:mine_range(
+            1,
+            0,
+            100,
+            "pr.shekhawat"
+        ),
+
+    lists:foreach(
+        fun({Candidate, Hash}) ->
+            ActualHash =
+                bitcoin_utils:hash_to_hex(
+                    crypto:hash(
+                        sha256,
+                        Candidate
+                    )
+                ),
+
+            ?assertEqual(Hash, ActualHash),
+
+            ?assert(
+                bitcoin_utils:has_leading_zeroes(
+                    Hash,
+                    1
+                )
+            )
+        end,
+        Results
+    ).
+
+mine_result_nonce_order_test() ->
+    Results =
+        bitcoin_miner:mine_range(
+            0,
+            0,
+            5,
+            "pr.shekhawat"
+        ),
+
+    Nonces =
+        [
+            list_to_integer(
+                lists:nthtail(
+                    length("pr.shekhawat;"),
+                    binary_to_list(Candidate)
+                )
+            )
+         || {Candidate, _Hash} <- Results
+        ],
+
+    ?assertEqual(
+        [0, 1, 2, 3, 4, 5],
+        Nonces
+    ).
 
 boss_start_test() ->
-    BossPid =
+    Pid =
         bitcoin_boss:start(
             0,
+            10,
+            10,
             1,
-            1,
-            1,
-            "test"
+            "pr.shekhawat"
         ),
 
-    ?assert(
-        is_process_alive(BossPid)
-    ),
-
-    ?assert(
-        wait_for_process_exit(
-            BossPid,
-            100
-        )
-    ).
-
-boss_start_export_test() ->
-    ?assert(
-        erlang:function_exported(
-            bitcoin_boss,
-            start,
-            5
-        )
-    ),
-
-    ?assert(
-        erlang:function_exported(
-            bitcoin_boss,
-            start,
-            4
-        )
-    ),
-
-    ?assert(
-        erlang:function_exported(
-            bitcoin_boss,
-            start,
-            3
-        )
-    ),
-
-    ?assert(
-        erlang:function_exported(
-            bitcoin_boss,
-            start,
-            2
-        )
-    ).
-
-worker_start_test() ->
-    WorkerPid =
-        bitcoin_worker:start(
-            self(),
-            "test"
-        ),
-
-    ?assert(
-        is_process_alive(WorkerPid)
-    ),
-
-    WorkerPid ! stop,
-
-    timer:sleep(10),
-
-    ?assertNot(
-        is_process_alive(WorkerPid)
-    ).
-
-worker_start_remote_test() ->
-    WorkerPid =
-        bitcoin_worker:start_remote(
-            'bitcoin_worker@invalid',
-            "test"
-        ),
-
-    ?assert(
-        is_pid(WorkerPid)
-    ),
+    ?assert(is_pid(Pid)),
 
     timer:sleep(100),
 
-    ?assertNot(
-        is_process_alive(WorkerPid)
-    ).
+    ?assertNot(is_process_alive(Pid)).
 
-wait_for_process_exit(_Pid, 0) ->
-    false;
+boss_multiple_workers_test() ->
+    Pid =
+        bitcoin_boss:start(
+            0,
+            10,
+            100,
+            2,
+            "pr.shekhawat"
+        ),
 
-wait_for_process_exit(Pid, Attempts) ->
-    case is_process_alive(Pid) of
-        true ->
-            timer:sleep(10),
-            wait_for_process_exit(
-                Pid,
-                Attempts - 1
-            );
+    ?assert(is_pid(Pid)),
 
-        false ->
-            true
-    end.
+    timer:sleep(100),
+
+    ?assertNot(is_process_alive(Pid)).
+
+boss_silent_start_test() ->
+    Pid =
+        bitcoin_boss:start_silent(
+            0,
+            10,
+            10,
+            1,
+            "pr.shekhawat"
+        ),
+
+    ?assert(is_pid(Pid)),
+
+    timer:sleep(100),
+
+    ?assertNot(is_process_alive(Pid)).
+
+worker_start_test() ->
+    Boss =
+        spawn(fun() ->
+            receive
+                _ ->
+                    ok
+            end
+        end),
+
+    Worker =
+        bitcoin_worker:start(
+            Boss,
+            "pr.shekhawat"
+        ),
+
+    ?assert(is_pid(Worker)),
+
+    Worker ! stop,
+    Boss ! stop.

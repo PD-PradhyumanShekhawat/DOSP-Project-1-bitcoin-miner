@@ -9,13 +9,15 @@
 hash_to_hex(Hash) ->
     binary_to_list(
         list_to_binary(
-            io_lib:format("~64.16.0b", [binary:decode_unsigned(Hash)])
+            io_lib:format(
+                "~64.16.0b",
+                [binary:decode_unsigned(Hash)]
+            )
         )
     ).
 
 has_leading_zeroes(Hash, K) ->
-    Prefix = lists:sublist(Hash, K),
-    Prefix =:= lists:duplicate(K, $0).
+    lists:sublist(Hash, K) =:= lists:duplicate(K, $0).
 
 make_candidate(GatorLinkId, Nonce) ->
     list_to_binary(
