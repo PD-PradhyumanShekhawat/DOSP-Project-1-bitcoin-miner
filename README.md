@@ -118,13 +118,46 @@ bitcoin <server_ip>
 ## Result
 |Parameter|Result|Screenshot|
 |---|----------------|--|
-|4 coins|WorkUnit 10000;TotalWork  10000000 |![Server](images/server1_prefix4.png) ![Client](images/client1_prefix4.png)|
+|4 coins|WorkUnit 10,000;TotalWork  10,000,000 |![Server](images/server1_prefix4.png) ![Client](images/client1_prefix4.png)|
 |Coin with most 0s kprabhakaran | 5 | ![kprabhakaran](images/coin_with_most_zeros_kprabhakaran.png)|
 |Coin with most 0s pr.shekhawat | 5  |![pr.shekhawat](images/coin_with_most_0s_prshekhawat.png)|
 | Largest number of working machines/laptops tested| 2| |
 
+
 ## Performance
-TBD
+
+A work unit is the number of candidate sub-problems assigned to a worker in a
+single request from the boss.
+
+Different work-unit sizes were benchmarked using `k = 4` and a total search
+space of ten million candidates.
+
+The benchmark results were:
+
+| Work unit | Real time | User time | System time | CPU time | CPU/REAL |
+|---:|---:|---:|---:|---:|---:|
+| 1,000 | 10.80 s | 69.19 s | 0.18 s | 69.37 s | 6.423 |
+| 5,000 | 10.49 s | 67.20 s | 0.17 s | 67.37 s | 6.422 |
+| 10,000 | 10.28 s | 67.52 s | 0.19 s | 67.71 s | 6.587 |
+| 50,000 | 10.05 s | 67.15 s | 0.20 s | 67.35 s | 6.701 |
+| 100,000 | 10.62 s | 67.72 s | 0.21 s | 67.93 s | 6.396 |
+
+The benchmark showed that a work-unit size of `50,000` produced the lowest
+measured real time (10.05 seconds). The work-unit sizes were evaluated by
+running the same `k = 4` mining workload over ten million candidates and
+measuring real time, user CPU time, system CPU time, total CPU time, and the
+CPU/REAL ratio.
+
+The difference between the best-performing configuration (`50,000`) and
+`10,000` was small (10.05 seconds versus 10.28 seconds). The final
+implementation retains a work unit of `10,000` because this configuration was
+successfully validated during the distributed execution.
+
+The final implementation uses a work unit of:
+
+```text
+10,000 candidates
+```
 
 ## Running Time and Parallelism
 
@@ -157,6 +190,11 @@ The server therefore shows significant parallel CPU utilization, while
 the client has relatively little local CPU utilization. This proves distributed computation where most of the computational work is
 performed by the server.
 
+### Distributed Execution
+
+The implementation was successfully tested using two machines. The server
+displayed the mined coins while the remote worker participated in the mining
+without displaying mining results.
 
 ## Summary
 
@@ -167,6 +205,24 @@ coins to the boss.
 
 The final local `k = 4` execution searched one million candidates using eight
 worker actors and produced nine valid coins with a CPU/REAL-time ratio of 4.10
+
+### Summary(with the new results)
+
+The project implements a parallel and distributed Bitcoin-like miner using
+Erlang actors. The boss actor manages the search space and dynamically assigns
+ranges to worker actors. Workers independently perform SHA-256 mining and
+return valid coins to the boss.
+
+The final `k = 4` execution searched 10,000,000 candidates using 8 worker
+actors and produced 135 valid coins. The measured CPU/REAL-time ratio was
+6.113.
+
+The final implementation uses a work unit of 10,000 candidates. Although
+50,000 candidates produced the lowest measured real time during benchmarking,
+10,000 was retained because it was successfully validated during distributed
+execution.
+
+The implementation was successfully tested across 2 machines.
 
 
 
