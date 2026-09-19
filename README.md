@@ -119,6 +119,37 @@ bitcoin <server_ip>
 ![Server](images/server1_prefix4.png)
 ![Client](images/client1_prefix4.png)
 
+## Running Time and Parallelism
+
+The execution times were measured separately on the client and server using
+the `time` command.
+
+#### Client
+
+- **Real time:** 24.726 seconds
+- **User CPU time:** 6.33 seconds
+- **System CPU time:** 0.31 seconds
+- **Total CPU time:** 6.64 seconds
+- **CPU/Real ratio:** $6.64 / 24.726 \approx 0.27$
+
+Thus, the client used approximately **0.27 effective CPU cores** during
+the computation.
+
+#### Server
+
+- **Real time:** 14.619 seconds
+- **User CPU time:** 58.17 seconds
+- **System CPU time:** 1.81 seconds
+- **Total CPU time:** 59.98 seconds
+- **CPU/Real ratio:** $59.98 / 14.619 \approx 4.10$
+
+Thus, the server used approximately **4.10 effective CPU cores** during
+the computation.
+
+The server therefore shows significant parallel CPU utilization, while
+the client has relatively little local CPU utilization. This proves distributed computation where most of the computational work is
+performed by the server.
+
 ## Performance
 The work unit is the number of candidate sub-problems assigned to a worker in one
 request from the boss. The measurements below used `k = 4`, one million total
