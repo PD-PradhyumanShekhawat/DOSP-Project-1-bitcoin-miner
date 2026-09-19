@@ -200,16 +200,6 @@ without displaying mining results.
 
 ## Summary
 
-The project implements a parallel and distributed Bitcoin-like miner using Erlang
-actors. The boss actor manages the search space and dynamically assigns ranges to
-worker actors. Workers independently perform SHA-256 mining and return valid
-coins to the boss.
-
-The final local `k = 4` execution searched one million candidates using eight
-worker actors and produced nine valid coins with a CPU/REAL-time ratio of 4.10
-
-### Summary(with the new results)
-
 The project implements a parallel and distributed Bitcoin-like miner using
 Erlang actors. The boss actor manages the search space and dynamically assigns
 ranges to worker actors. Workers independently perform SHA-256 mining and
