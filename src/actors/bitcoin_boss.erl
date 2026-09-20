@@ -22,9 +22,6 @@ boss_init(K, WorkUnit, TotalWork, WorkerCount, GatorLinkId) ->
     timer:sleep(1000),
     boss_loop(K, WorkUnit, TotalWork, GatorLinkId, NextStart, Workers).
 
-start_workers(0, _K, _WorkUnit, _TotalWork, _GatorLinkId, NextStart, Workers) ->
-    {Workers, NextStart};
-
 start_workers(Count, K, WorkUnit, TotalWork, GatorLinkId, NextStart, Workers) ->
     case NextStart < TotalWork of
         true ->

@@ -24,14 +24,14 @@ hash_to_hex_parameterized_test_() ->
                 "fb4431b6a2df71b6cbad961e08fa06ee6fff47e3bc14e977f4b2ea57caee48a4"
             },
             {
-                <<"pr.shekhawat;kjsdfk11">>,
+                <<"adobra;kjsdfk11">>,
                 "0d402337f95d018438aad6c7dd75ad6e9239d6060444a7a6b26299b261aa9a8b"
             }
         ]
     ].
 
 problem_statement_example_test() ->
-    Candidate = <<"pr.shekhawat;kjsdfk11">>,
+    Candidate = <<"adobra;kjsdfk11">>,
     Hash = crypto:hash(sha256, Candidate),
     HexHash = bitcoin_utils:hash_to_hex(Hash),
 
@@ -98,7 +98,7 @@ mine_range_parameterized_test_() ->
                 {<<"test;2">>, "3e189adbf13058c2c8df4a2afe09bcc12611ecee8a7c4df3fb4d06e09b66c3dd"}
             ]},
             {0, 4, 4, "pr.shekhawat", [
-                {<<"pr.shekhawat;4">>, "be49e31dc227c3217ce4e7f97d3954c5a13090f4b69b08b46d3738e01a250b68"}
+                {<<"pr.shekhawat;4">>, "16820d818eea7722a88f6e0efa773b22d9733a0a596e85c88928c7f6b45833f0"}
             ]},
             {1, 4, 2, "test", []}
         ]

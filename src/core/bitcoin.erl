@@ -4,7 +4,7 @@
 
 main([Argument]) ->
     case string:to_integer(Argument) of
-        {K, ""} ->
+                {K, ""} ->
             start_server(K);
 
         _ ->
@@ -35,7 +35,6 @@ io:format("Server node: ~p~n", [ServerNode]),
 wait_for_boss(BossPid) ->
     case is_process_alive(BossPid) of
         true ->
-            timer:sleep(100),
             wait_for_boss(BossPid);
         false ->
             ok

@@ -12,17 +12,11 @@ The program searches for strings whose SHA-256 hash starts with a specified numb
 The mining work is divided into ranges and processed by worker actors under the control of a boss actor.
 The implementation is designed to make use of multiple CPU cores and to support distributed workers running on other machines.
 
-## Current Implementation
-The project currently includes:
-- SHA-256 hashing using Erlang's `crypto` module
-- Verification of hashes with a required number of leading zeroes
-- Candidate generation using a GatorLink ID and nonce
-- Worker actors for processing ranges of candidate values
-- A boss actor that assigns work to workers
-- Dynamic assignment of new work when a worker finishes its current range
-- Multiple worker actors running concurrently
-- Use of the available Erlang schedulers for local parallel execution
-- Command-line entry point for starting the miner
+## Actor Model and Work Distribution
+The mining work is divided among worker actors.
+The boss actor maintains the work allocation and gives each worker a range of candidate values.
+When a worker finishes, it sends the results back to the boss and receives another range when more work is available.
+This allows multiple workers to operate concurrently while keeping work allocation centralized in the boss.
 
 ## Project Structure
 ```text
@@ -38,6 +32,17 @@ DOSP-Project-1-bitcoin-miner/
 │       └── bitcoin_utils.erl
 ├── test/
 │   └── bitcoin_tests.erl
+├── benchmark/
+│   └── bitcoin_benchmark.erl
+│   └── run_benchmark.sh
+│   └── run_k4.sh
+│   └── results/
+│   │   ├── benchmark_results.csv
+│   │   ├── k4_highest_zero.txt
+│   │   ├── k4_output.txt
+│   │   ├── k4_summary.txt
+│   │   ├── k4_time.txt
+├── images/
 ├── README.md
 └── .gitignore
 ```
@@ -50,33 +55,38 @@ src/actors/bitcoin_boss.erl| Coordinates the mining process. It creates worker a
 |src/actors/bitcoin_worker.erl|Worker actor responsible for receiving a range of candidate values, mining that range, and returning any valid coins to the boss.|
 |src/core/bitcoin_miner.erl| Performs the actual mining operation over an assigned range.|
 |src/utils/bitcoin_utils.erl| Contains candidate generation, SHA-256 hash conversion, and leading-zero helpers.|
+|benchmark/run_benchmark.sh| Runs benchmarks across different work-unit sizes, measures execution and CPU times, calculates the CPU-to-real-time ratio, and saves the results to results/**benchmark_results.csv**
+|benchmark/run_k4.sh| Runs the final k=4 mining benchmark, records real/user/system CPU times, calculates CPU time and CPU-to-real-time ratio, counts coins found, identifies the coin with the highest number of leading zeroes, and writes the results to **k4_summary.txt** and **k4_output.txt**
 
 ## Steps to Execute
 Compile the source files and test:
 ```bash
 mkdir -p ebin
-erlc -o ebin src/actors/**.erl src/core/**.erl src/utils/*.erl test/**.erl
+erlc -o ebin src/actors/**.erl src/core/**.erl src/utils/*.erl
 ```
-
-Run the unit tests:
+### For dsitributed computation:
+Start server:
 ```bash
-erl -noshell -pa ebin -eval 'eunit:test(bitcoin_tests, [verbose]), halt().'
+erl -name bitcoin_server@<server_ip> -setcookie bitcoin_cookie -kernel inet_dist_listen_min 54031 inet_dist_listen_max 54031 -pa ebin
 ```
 
-Start Erlang with the compiled modules:
+Start worker:
 ```bash
-erl -name bitcoin_server@192.168.0.14 -setcookie bitcoin_cookie -kernel inet_dist_listen_min 54031 inet_dist_listen_max 54031 -pa ebin
+erl -name bitcoin_worker@<worker_ip> -setcookie bitcoin_cookie -kernel inet_dist_listen_min 54031 inet_dist_listen_max 54031 -pa ebin
 ```
 
-The current local entry point accepts the required number of leading zeroes:
+Start mining computation for K:
 ```erlang
 bitcoin:main(["4"]).
 ```
 
-For example, 4 searches for hashes beginning with:
-```text
-0000
+Initiate worker with server ip:
+```erlang
+bitcoin:main(["<server_ip>"]).
 ```
+
+Here mining starts on hashes with 4 leading 0’s  =>
+`0000`
 
 The server prints each valid coin as an independent line in the following
 format, with the input string and SHA-256 hash separated by a TAB:
@@ -93,14 +103,30 @@ pr.shekhawat;kjsdfk11
 ```
 to produce:
 ```text
-0d402337f95d018438aad6c7dd75ad6e9239d6060444a7a6b26299b261aa9a8b
+fe34d1b51a9a75dbdfbc9aa92a779516e8710a47c0cd9b5b25d7e23cda35b711
 ```
 
-## Actor Model
-The mining work is divided among worker actors.
-The boss actor maintains the work allocation and gives each worker a range of candidate values.
-When a worker finishes, it sends the results back to the boss and receives another range when more work is available.
-This allows multiple workers to operate concurrently while keeping work allocation centralized in the boss.
+## Testing & Benchmark
+Compile the source files and test and benchmark:
+```bash
+mkdir -p ebin
+erlc -o ebin src/actors/**.erl src/core/**.erl src/utils/*.erl test/**.erl benchmark/**.erl
+```
+
+Run the unit tests:
+```bash
+erl -noshell -pa ebin -eval 'eunit:test(bitcoin_tests, [verbose]), halt().'
+```
+
+Benchmark for performance:
+```bash
+sh run_benchmark.sh
+```
+
+Benchmark implementation for k=4
+```bash
+sh run_k4.sh
+```
 
 ## Distributed Mining
 A server will allow the remote worker running on another machine to connect and receive mining work.
@@ -166,27 +192,11 @@ The final implementation uses a work unit of:
 The execution times were measured separately on the client and server using
 the `time` command.
 
-#### Client
+| work_unit | real_seconds | user_seconds | sys_seconds | cpu_seconds | cpu_real_ratio |
+| --------: | -----------: | -----------: | ----------: | ----------: | -------------: |
+|     10000 |       24.726 |         6.33 |        0.31 |        6.64 |           0.27 |
+|     10000 |       14.619 |        58.17 |        1.81 |       59.98 |           4.10 |
 
-- **Real time:** 24.726 seconds
-- **User CPU time:** 6.33 seconds
-- **System CPU time:** 0.31 seconds
-- **Total CPU time:** 6.64 seconds
-- **CPU/Real ratio:** $6.64 / 24.726 \approx 0.27$
-
-Thus, the client used approximately **0.27 effective CPU cores** during
-the computation.
-
-#### Server
-
-- **Real time:** 14.619 seconds
-- **User CPU time:** 58.17 seconds
-- **System CPU time:** 1.81 seconds
-- **Total CPU time:** 59.98 seconds
-- **CPU/Real ratio:** $59.98 / 14.619 \approx 4.10$
-
-Thus, the server used approximately **4.10 effective CPU cores** during
-the computation.
 
 The server therefore shows significant parallel CPU utilization, while
 the client has relatively little local CPU utilization. This proves distributed computation where most of the computational work is
