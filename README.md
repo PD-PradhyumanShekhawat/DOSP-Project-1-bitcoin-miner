@@ -107,9 +107,19 @@ fe34d1b51a9a75dbdfbc9aa92a779516e8710a47c0cd9b5b25d7e23cda35b711
 ```
 
 ## Distrituted Execution
-|Parameter|Result|Screenshot|
-|---|----------------|--|
-|4 coins|WorkUnit 10,000; TotalWork  10,000,000 |![Server](images/server1_prefix4.png) ![Client](images/client1_prefix4.png)|
+The implementation was successfully tested using two machines. The server
+displayed the mined coins while the remote worker participated in the mining without displaying mining results.
+
+|Parameter|Value|
+|--|--|
+|K |4 coins|
+|WorkUnit |10,000| 
+|TotalWork  |10,000,000 |
+
+Server
+![Server](images/server1_prefix4.png) 
+Client
+![Client](images/client1_prefix4.png)
 
 The execution times were measured separately on the client and server using
 the `time` command.
@@ -124,11 +134,8 @@ The server therefore shows significant parallel CPU utilization, while
 the client has relatively little local CPU utilization. This proves distributed computation where most of the computational work is
 performed by the server.
 
-The implementation was successfully tested using two machines. The server
-displayed the mined coins while the remote worker participated in the mining
-without displaying mining results.
 
-## Result
+## Validations
 |Parameter|Result|Screenshot|
 |---|----------------|--|
 |Coin with most 0s kprabhakaran | 5 | ![kprabhakaran](images/coin_with_most_zeros_kprabhakaran.png)|
@@ -179,33 +186,5 @@ The benchmark showed that a work-unit size of `1,000` produced the lowest measur
 
 The difference between the best-performing configuration (`1,000`) and
 `10,000` was small (5.18 seconds versus 5.39 seconds).
-
-## Summary
-
-The project implements a parallel and distributed Bitcoin-like miner using Erlang
-actors. The boss actor manages the search space and dynamically assigns ranges to
-worker actors. Workers independently perform SHA-256 mining and return valid
-coins to the boss.
-
-The final local `k = 4` execution searched one million candidates using eight
-worker actors and produced nine valid coins with a CPU/REAL-time ratio of 4.10
-
-### Summary(with the new results)
-
-The project implements a parallel and distributed Bitcoin-like miner using
-Erlang actors. The boss actor manages the search space and dynamically assigns
-ranges to worker actors. Workers independently perform SHA-256 mining and
-return valid coins to the boss.
-
-The final `k = 4` execution searched 10,000,000 candidates using 8 worker
-actors and produced 135 valid coins. The measured CPU/REAL-time ratio was
-6.113.
-
-The final implementation uses a work unit of 10,000 candidates. Although
-50,000 candidates produced the lowest measured real time during benchmarking,
-10,000 was retained because it was successfully validated during distributed
-execution.
-
-The implementation was successfully tested across 2 machines.
 
 
