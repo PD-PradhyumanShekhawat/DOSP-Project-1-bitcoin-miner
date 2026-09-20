@@ -92,7 +92,7 @@ The server prints each valid coin as an independent line in the following
 format, with the input string and SHA-256 hash separated by a TAB:
 
 ```text
-input;nonce<TAB>SHA-256-hash
+kprabhakaran;425956 00007657795b1a50efa6fe8043ab5ecfe8eb210c926b31af986e783aacec17e0
 ```
 
 ## 
@@ -134,6 +134,8 @@ The server therefore shows significant parallel CPU utilization, while
 the client has relatively little local CPU utilization. This proves distributed computation where most of the computational work is
 performed by the server.
 
+## Server Only Execution
+The server is also designed to mine coins without remote workers. Local worker actors are created by the server and receive work from the boss actor.
 
 ## Validations
 |Parameter|Result|Screenshot|
