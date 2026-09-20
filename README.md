@@ -128,27 +128,12 @@ Benchmark implementation for k=4
 sh run_k4.sh
 ```
 
-## Distributed Mining
-A server will allow the remote worker running on another machine to connect and receive mining work.
-The intended usage is:
-
-**Server:**
-```text
-bitcoin <number_of_zeroes>
-```
-
-**Worker:**
-```text
-bitcoin <server_ip>
-```
-
-
 ## Result
 |Parameter|Result|Screenshot|
 |---|----------------|--|
 |4 coins|WorkUnit 10,000;TotalWork  10,000,000 |![Server](images/server1_prefix4.png) ![Client](images/client1_prefix4.png)|
 |Coin with most 0s kprabhakaran | 5 | ![kprabhakaran](images/coin_with_most_zeros_kprabhakaran.png)|
-|Coin with most 0s pr.shekhawat | 5  |![pr.shekhawat](images/coin_with_most_0s_prshekhawat.png)|
+|Coin with most 0s pr.shekhawat | 5  |![pr.shekhawat](images/coin_with_most_zeros_prshekhawat.png)|
 | Largest number of working machines/laptops tested| 2| |
 
 
