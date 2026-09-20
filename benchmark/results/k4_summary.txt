@@ -1,0 +1,14 @@
+Final k=4 Results
+=================
+
+Coins found: 150
+
+Real time       : 5.26 seconds
+User time       : 44.47 seconds
+System time     : 0.77 seconds
+CPU time        : 45.240 seconds
+CPU/REAL ratio  : 8.601
+
+Highest-zero coin:
+5
+kprabhakaran;8978668	000008dc7fa2434d035b9c6ebf315697a646ce8b19805aded56b3d1068ad6071

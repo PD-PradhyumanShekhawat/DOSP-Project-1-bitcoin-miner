@@ -1,17 +1,9 @@
 -module(bitcoin_benchmark).
 
 -export([
-    run/0,
     run/1,
     benchmark/5
 ]).
-
-run() ->
-    run([
-        {4, 1000, 1000000},
-        {4, 10000, 1000000},
-        {4, 100000, 1000000}
-    ]).
 
 run(Configurations) ->
     WorkerCount = erlang:system_info(schedulers_online),

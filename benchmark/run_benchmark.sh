@@ -1,20 +1,19 @@
 #!/bin/bash
 
-cd "$(dirname "$0")/.."
 
-RESULTS="docs/benchmark_results.csv"
-TIME_FILE="benchmark/time.txt"
+RESULTS="results/benchmark_results.csv"
+TIME_FILE="time.txt"
 
-mkdir -p docs
+mkdir -p results
 
-echo "work_unit,real_seconds,user_seconds,sys_seconds,cpu_seconds,cpu_real_ratio" > "$RESULTS"
+echo "work_unit,\treal_seconds,\tuser_seconds,\tsys_seconds,\tcpu_seconds,\tcpu_real_ratio" > "$RESULTS"
 
 for WORK_UNIT in 1000 5000 10000 50000 100000
 do
     echo "Testing work unit: $WORK_UNIT"
 
     /usr/bin/time -p \
-        erl -noshell -pa ebin \
+        erl -noshell -pa ../ebin \
         -eval "bitcoin_benchmark:run([{4, $WORK_UNIT, 10000000}]), halt()." \
         > /dev/null 2> "$TIME_FILE"
 
@@ -28,14 +27,13 @@ do
     RATIO=$(awk -v cpu="$CPU" -v real="$REAL" \
         'BEGIN {printf "%.3f", cpu/real}')
 
-    echo "$WORK_UNIT,$REAL,$USER,$SYS,$CPU,$RATIO" >> "$RESULTS"
+    echo "$WORK_UNIT,\t\t\t$REAL,\t\t\t$USER,\t\t\t$SYS,\t\t\t$CPU,\t\t\t$RATIO" >> "$RESULTS"
 
     echo "  Real: $REAL s"
     echo "  User: $USER s"
     echo "  Sys:  $SYS s"
     echo "  CPU:  $CPU s"
     echo "  Ratio: $RATIO"
-    echo
 done
 
 echo "Results saved to $RESULTS"
