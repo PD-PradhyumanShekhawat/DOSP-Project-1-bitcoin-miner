@@ -106,6 +106,36 @@ to produce:
 fe34d1b51a9a75dbdfbc9aa92a779516e8710a47c0cd9b5b25d7e23cda35b711
 ```
 
+## Distrituted Execution
+|Parameter|Result|Screenshot|
+|---|----------------|--|
+|4 coins|WorkUnit 10,000; TotalWork  10,000,000 |![Server](images/server1_prefix4.png) ![Client](images/client1_prefix4.png)|
+
+The execution times were measured separately on the client and server using
+the `time` command.
+
+| work_unit | real_seconds | user_seconds | sys_seconds | cpu_seconds | cpu_real_ratio |
+| --------: | -----------: | -----------: | ----------: | ----------: | -------------: |
+|     10000 |       24.726 |         6.33 |        0.31 |        6.64 |           0.27 |
+|     10000 |       14.619 |        58.17 |        1.81 |       59.98 |           4.10 |
+
+
+The server therefore shows significant parallel CPU utilization, while
+the client has relatively little local CPU utilization. This proves distributed computation where most of the computational work is
+performed by the server.
+
+The implementation was successfully tested using two machines. The server
+displayed the mined coins while the remote worker participated in the mining
+without displaying mining results.
+
+## Result
+|Parameter|Result|Screenshot|
+|---|----------------|--|
+|Coin with most 0s kprabhakaran | 5 | ![kprabhakaran](images/coin_with_most_zeros_kprabhakaran.png)|
+|Coin with most 0s pr.shekhawat | 5  |![pr.shekhawat](images/coin_with_most_zeros_prshekhawat.png)|
+| Largest number of working machines/laptops tested| 2| |
+
+
 ## Testing & Benchmark
 Compile the source files and test and benchmark:
 ```bash
@@ -128,15 +158,6 @@ Benchmark implementation for k=4
 sh run_k4.sh
 ```
 
-## Result
-|Parameter|Result|Screenshot|
-|---|----------------|--|
-|4 coins|WorkUnit 10,000;TotalWork  10,000,000 |![Server](images/server1_prefix4.png) ![Client](images/client1_prefix4.png)|
-|Coin with most 0s kprabhakaran | 5 | ![kprabhakaran](images/coin_with_most_zeros_kprabhakaran.png)|
-|Coin with most 0s pr.shekhawat | 5  |![pr.shekhawat](images/coin_with_most_zeros_prshekhawat.png)|
-| Largest number of working machines/laptops tested| 2| |
-
-
 ## Performance
 
 A work unit is the number of candidate sub-problems assigned to a worker in a
@@ -156,37 +177,8 @@ The benchmark results were:
 
 The benchmark showed that a work-unit size of `1,000` produced the lowest measured real time (5.18 seconds). The work-unit sizes were evaluated by running the same `k = 4` mining workload over ten million candidates and measuring real time, user CPU time, system CPU time, total CPU time, and the CPU/REAL ratio.
 
-The difference between the best-performing configuration (`50,000`) and
-`10,000` was small (10.05 seconds versus 10.28 seconds). The final
-implementation retains a work unit of `10,000` because this configuration was
-successfully validated during the distributed execution.
-
-The final implementation uses a work unit of:
-
-```text
-10,000 candidates
-```
-
-## Running Time and Parallelism
-
-The execution times were measured separately on the client and server using
-the `time` command.
-
-| work_unit | real_seconds | user_seconds | sys_seconds | cpu_seconds | cpu_real_ratio |
-| --------: | -----------: | -----------: | ----------: | ----------: | -------------: |
-|     10000 |       24.726 |         6.33 |        0.31 |        6.64 |           0.27 |
-|     10000 |       14.619 |        58.17 |        1.81 |       59.98 |           4.10 |
-
-
-The server therefore shows significant parallel CPU utilization, while
-the client has relatively little local CPU utilization. This proves distributed computation where most of the computational work is
-performed by the server.
-
-### Distributed Execution
-
-The implementation was successfully tested using two machines. The server
-displayed the mined coins while the remote worker participated in the mining
-without displaying mining results.
+The difference between the best-performing configuration (`1,000`) and
+`10,000` was small (5.18 seconds versus 5.39 seconds).
 
 ## Summary
 
