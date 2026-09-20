@@ -146,20 +146,15 @@ Different work-unit sizes were benchmarked using `k = 4` and a total search
 space of ten million candidates.
 
 The benchmark results were:
-
 | Work unit | Real time | User time | System time | CPU time | CPU/REAL |
 |---:|---:|---:|---:|---:|---:|
-| 1,000 | 10.80 s | 69.19 s | 0.18 s | 69.37 s | 6.423 |
-| 5,000 | 10.49 s | 67.20 s | 0.17 s | 67.37 s | 6.422 |
-| 10,000 | 10.28 s | 67.52 s | 0.19 s | 67.71 s | 6.587 |
-| 50,000 | 10.05 s | 67.15 s | 0.20 s | 67.35 s | 6.701 |
-| 100,000 | 10.62 s | 67.72 s | 0.21 s | 67.93 s | 6.396 |
+| 1,000 | 5.18 s | 45.56 s | 0.87 s | 46.430 s | 8.963 |
+| 5,000 | 5.73 s | 46.56 s | 0.82 s | 47.380 s | 8.269 |
+| 10,000 | 5.39 s | 47.38 s | 0.82 s | 48.200 s | 8.942 |
+| 50,000 | 5.70 s | 48.75 s | 0.80 s | 49.550 s | 8.693 |
+| 100,000 | 5.61 s | 48.54 s | 0.80 s | 49.340 s | 8.795 |
 
-The benchmark showed that a work-unit size of `50,000` produced the lowest
-measured real time (10.05 seconds). The work-unit sizes were evaluated by
-running the same `k = 4` mining workload over ten million candidates and
-measuring real time, user CPU time, system CPU time, total CPU time, and the
-CPU/REAL ratio.
+The benchmark showed that a work-unit size of `1,000` produced the lowest measured real time (5.18 seconds). The work-unit sizes were evaluated by running the same `k = 4` mining workload over ten million candidates and measuring real time, user CPU time, system CPU time, total CPU time, and the CPU/REAL ratio.
 
 The difference between the best-performing configuration (`50,000`) and
 `10,000` was small (10.05 seconds versus 10.28 seconds). The final
