@@ -112,7 +112,7 @@ displayed the mined coins while the remote worker participated in the mining wit
 
 |Parameter|Value|
 |--|--|
-|K |4 coins|
+|K |4 |
 |WorkUnit |10,000| 
 |TotalWork  |10,000,000 |
 
